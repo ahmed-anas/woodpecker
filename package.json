@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/ahmed-anas/woodpecker/issues"
   },
+  "engines": {
+    "node": ">=7.8.4"
+  },
   "homepage": "https://github.com/ahmed-anas/woodpecker#readme"
 }
