@@ -4,7 +4,7 @@
   "description": "node.js library for woodpecker.co API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --reporter spec"
   },
   "repository": {
     "type": "git",
@@ -24,5 +24,9 @@
   "engines": {
     "node": ">=7.8.4"
   },
-  "homepage": "https://github.com/ahmed-anas/woodpecker#readme"
+  "homepage": "https://github.com/ahmed-anas/woodpecker#readme",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^3.5.3"
+  }
 }
