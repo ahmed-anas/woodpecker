@@ -1,0 +1,25 @@
+{
+  "name": "woodpecker",
+  "version": "0.1.0",
+  "description": "node.js library for woodpecker.co API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmed-anas/woodpecker.git"
+  },
+  "keywords": [
+    "woodpecker",
+    "node.js",
+    "javascript",
+    "ahmed-anas"
+  ],
+  "author": "Syed Ahmed Anas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ahmed-anas/woodpecker/issues"
+  },
+  "homepage": "https://github.com/ahmed-anas/woodpecker#readme"
+}
