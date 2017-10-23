@@ -1,6 +1,7 @@
 'use strict';
 
 const https = require('https');
+const config = require('./config');
 
 //TODO: make it so it doesn't alter globalagent
 https.globalAgent.options.secureProtocol = 'TLSv1_method';
@@ -21,6 +22,7 @@ class Woodpecker {
     getCampaignList() {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/campaign_list';
+            console.log(this.options);
            let req = https.get(
                this.options,
                 (res) => {
@@ -72,12 +74,37 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
+    createCompany(reqData){
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/agency/companies/add';
+            this.options.method = "Post"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+                           
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            req.end(JSON.stringify(reqData));
+        })
+    }
 }
 
 
 module.exports = Woodpecker;
 
-// let x = new Woodpecker('18405.6524581ed2a3d81b36f7910dcc0d7746a2e8b61adbb07a15f5ccc5edd11fc754');
+ //let x = new Woodpecker(config.woodpecker_api_key);
 // var req = {
 //     name: "First testing campaign",
 //     status: "DRAFT",
@@ -115,5 +142,10 @@ module.exports = Woodpecker;
 // x.createCampaign(req).then(ls => {
 //     console.log(ls);
 // }).catch(err => {
+//     console.error(err);
+// })
+// x.getCampaignList().then(res =>{
+// console.log(res);
+// }).catch(err =>{
 //     console.error(err);
 // })

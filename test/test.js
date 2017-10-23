@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var Woodpecker = require('../index');
 const eventually = require('./test-helper').eventually;
 const TestConfig = require('./test-config');
+
 var woodpecker = null;
 
 describe('Woodpecker API calls', function () {
@@ -25,8 +26,8 @@ describe('Woodpecker API calls', function () {
     var req = {
         name: "First testing campaign 2",
         status: "DRAFT",
-        from_name: "Waqas Iqbal",
-        from_email: "waqasiqbal740@gmail.com",
+        from_name: "",
+        from_email: "",
         per_day: 2,
         stats: {
             emails: [
@@ -48,26 +49,55 @@ describe('Woodpecker API calls', function () {
                     friTo: 0,
                     satFrom: 0,
                     satTo: 0,
-                   
-        }]
+
+                }]
         }
-      }
+    }
     it('should create campaign', function (done) {
-        
+
         req.stats.emails[0].follow_up = 0;
         woodpecker.createCampaign(req).then(eventually(done, (ls => {
             expect(ls).to.be.an.instanceOf(Object);
-           
+
         }))).catch(err => {
             done(err);
         });
 
     })
     it("shouldn't create campaign", function (done) {
-       delete req.stats.emails[0].follow_up;
+        delete req.stats.emails[0].follow_up;
         woodpecker.createCampaign(req).then(eventually(done, (ls => {
             done(new Error('error'))
-           
+
+        }))).catch(err => {
+            done();
+        });
+
+    })
+    
+    it('should create company', function (done) {
+
+        let req = {
+            name: "Testing company",
+            api_key: "generate"
+        }
+        woodpecker.createCompany(req).then(eventually(done, (ls => {
+            expect(ls).to.be.an.instanceOf(Object);
+            expect(ls).to.have.own.property('id');
+
+        }))).catch(err => {
+            done(err);
+        });
+
+    })
+    it("shouldn't create company", function (done) {
+        let req = {
+            name: "Testing company",
+            api_key: "generate"
+        }
+        woodpecker.createCompany(req).then(eventually(done, (ls => {
+            done(new Error('error'))
+
         }))).catch(err => {
             done();
         });
