@@ -23,6 +23,16 @@ describe('Woodpecker API calls', function () {
         });
 
     })
+    it('should get list of prospects', function (done) {
+        woodpecker.getProspectList().then(eventually(done, (ls => {
+            expect(ls).to.be.an.instanceOf(Array);
+            expect(ls.length).to.be.above(0);
+            initialLength = ls.length;
+        }))).catch(err => {
+            done(err);
+        });
+
+    })
     it('should get list of prospects from specific campaigns', function (done) {
         woodpecker.getProspectsFromSpecficCampaigns(71359).then(eventually(done, (ls => {
             expect(ls).to.be.an.instanceOf(Array);
@@ -33,6 +43,7 @@ describe('Woodpecker API calls', function () {
         });
 
     })
+
     var req = {
         name: "First testing campaign 2",
         status: "DRAFT",
@@ -84,7 +95,7 @@ describe('Woodpecker API calls', function () {
         });
 
     })
-    
+
     it('should create company', function (done) {
 
         let req = {
@@ -113,6 +124,57 @@ describe('Woodpecker API calls', function () {
         });
 
     })
+    var prospectReq = {
+        "campaign":{
+            "campaign_id": 71359
+        },
+        "update": "true",
+        "prospects": [
+        {
+            "email":"add2@email.co", 
+            "first_name":"John", 
+            "last_name":"Doe",
+            "status":"ACTIVE",
+            "tags":"#tags",
+            "company":"company",
+            "industry":"industry",
+            "title":"title",
+            "phone":"+123 456 789",
+            "address":"address",
+            "city":"city",
+            "state":"state",
+            "country":"country",
+            "website":"website",
+            "snipet1":"snipet1",
+            "snipet2":"snipet2",
+            "snipet3":"snipet3",
+            "snip":"snipet4"
+            }
+    ]
+    }
+    it('should create prospect for specfic campaign', function (done) {
+
+        
+        woodpecker.createProspectForCampaign(prospectReq).then(eventually(done, (ls => {
+            expect(ls).to.be.an.instanceOf(Object);
+           
+
+        }))).catch(err => {
+            done(err);
+        });
+
+    })
+    it("shouldn't create prospect for specfic campaign", function (done) {
+       delete req.campaign;
+        woodpecker.createProspectForCampaign(prospectReq).then(eventually(done, (ls => {
+            done(new Error('error'))
+
+        }))).catch(err => {
+            done();
+        });
+
+    })
+
 })
 
 

@@ -22,7 +22,7 @@ class Woodpecker {
     getCampaignList() {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/campaign_list';
-            console.log(this.options);
+           
            let req = https.get(
                this.options,
                 (res) => {
@@ -102,7 +102,7 @@ class Woodpecker {
     getProspectsFromSpecficCampaigns(ids) {
         return new Promise((resolve, reject) => {
            this.options.path = '/rest/v1/prospects?campaigns_id='+ids;
-            console.log(this.options);
+           
            let req = https.get(
                this.options,
                 (res) => {
@@ -129,6 +129,62 @@ class Woodpecker {
             req.end();
         })
     }
+    getProspectList(ids) {
+        return new Promise((resolve, reject) => {
+           this.options.path = '/rest/v1/prospects'
+           
+           let req = https.get(
+               this.options,
+                (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve([]);
+                            }
+                            resolve(JSON.parse(data))
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                }
+            );
+            req.on('error', e => {
+                reject(e);
+            })
+            req.end();
+        })
+    }
+    createProspectForCampaign(reqData){
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/add_prospects_campaign';
+            this.options.method = "Post"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+                           
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            req.end(JSON.stringify(reqData));
+        })
+    }
+
 }
 
 
