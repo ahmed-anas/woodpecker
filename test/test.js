@@ -23,6 +23,16 @@ describe('Woodpecker API calls', function () {
         });
 
     })
+    it('should get list of prospects from specific campaigns', function (done) {
+        woodpecker.getProspectsFromSpecficCampaigns(71359).then(eventually(done, (ls => {
+            expect(ls).to.be.an.instanceOf(Array);
+            expect(ls.length).to.be.above(0);
+            initialLength = ls.length;
+        }))).catch(err => {
+            done(err);
+        });
+
+    })
     var req = {
         name: "First testing campaign 2",
         status: "DRAFT",

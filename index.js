@@ -99,12 +99,42 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
+    getProspectsFromSpecficCampaigns(ids) {
+        return new Promise((resolve, reject) => {
+           this.options.path = '/rest/v1/prospects?campaigns_id='+ids;
+            console.log(this.options);
+           let req = https.get(
+               this.options,
+                (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve([]);
+                            }
+                            resolve(JSON.parse(data))
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                }
+            );
+            req.on('error', e => {
+                reject(e);
+            })
+            req.end();
+        })
+    }
 }
 
 
 module.exports = Woodpecker;
 
- //let x = new Woodpecker(config.woodpecker_api_key);
+ let x = new Woodpecker(config.woodpecker_api_key);
 // var req = {
 //     name: "First testing campaign",
 //     status: "DRAFT",
