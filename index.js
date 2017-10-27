@@ -184,12 +184,12 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    deleteProspect(prospectsids, campaigns_id = false) {
-        prospectsids = prospectsids.trim();
+    deleteProspect(prospectIds, campaign_id = false) {
+        prospectIds = prospectIds.trim();
         return new Promise((resolve, reject) => {
-            var subUrl = prospectsids
-            if (campaigns_id) {
-                subUrl += '&campaigns_id=' + campaigns_id.trim()
+            var subUrl = prospectIds
+            if (campaign_id) {
+                subUrl += '&campaigns_id=' + campaign_id.trim()
             }
             this.options.path = '/rest/v1/prospects?id='+subUrl
             this.options.method = "Delete"
