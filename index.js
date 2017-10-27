@@ -184,13 +184,48 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
+    deleteProspect(prospectsids, campaigns_id = false) {
+        prospectsids = prospectsids.trim();
+        return new Promise((resolve, reject) => {
+            var subUrl = prospectsids
+            if (campaigns_id) {
+                subUrl += '&campaigns_id=' + campaigns_id.trim()
+            }
+            this.options.path = '/rest/v1/prospects?id='+subUrl
+            this.options.method = "Delete"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve([]);
+                            }
+                            resolve(JSON.parse(data))
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                }
+            );
+            req.on('error', e => {
+                reject(e);
+            })
+            req.end();
+        })
+    }
 
 }
 
 
 module.exports = Woodpecker;
 
- let x = new Woodpecker(config.woodpecker_api_key);
+//  let x = new Woodpecker(config.woodpecker_api_key);
 // var req = {
 //     name: "First testing campaign",
 //     status: "DRAFT",
@@ -233,5 +268,10 @@ module.exports = Woodpecker;
 // x.getCampaignList().then(res =>{
 // console.log(res);
 // }).catch(err =>{
+//     console.error(err);
+// })
+// x.deleteProspect("25577616,25577617").then(ls => {
+//     console.log(ls);
+// }).catch(err => {
 //     console.error(err);
 // })
