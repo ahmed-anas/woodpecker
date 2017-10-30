@@ -126,7 +126,7 @@ describe('Woodpecker API calls', function () {
     })
     var prospectReq = {
         "campaign":{
-            "campaign_id": 71359
+            "campaign_id": 71961
         },
         "update": "true",
         "prospects": [
