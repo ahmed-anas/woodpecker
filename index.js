@@ -2,15 +2,13 @@
 
 const https = require('https');
 const config = require('./config');
-//var prospectsfile = require('./test/prospects');
+var prospectsfile = require('./test/prospects');
 const async = require('async');
 const _ = require('lodash');
-
-
 //TODO: make it so it doesn't alter globalagent
 https.globalAgent.options.secureProtocol = 'TLSv1_method';
 class Woodpecker {
- constructor(API_KEY) {
+    constructor(API_KEY) {
         this.API_KEY = API_KEY;
         this.authHeader = "Basic " + new Buffer(this.API_KEY + ':X').toString('base64');
         this.options = {
@@ -20,6 +18,7 @@ class Woodpecker {
                 'Authorization': this.authHeader
             }
         }
+        this.firstRequest = true;
     }
 
 
@@ -103,30 +102,37 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    getProspectsFromSpecficCampaigns(ids, page = false,per_page=false) {
+    getProspectsFromSpecficCampaigns(ids, page = false, per_page = false) {
         return new Promise((resolve, reject) => {
-            let url ='/rest/v1/prospects?campaigns_id=' + ids;
-            if(page){
-                url+='&page='+page;
+            let url = '/rest/v1/prospects?campaigns_id=' + ids;
+            if (page) {
+                url += '&page=' + page;
             }
-            if(per_page){
-                url+='&per_page='+per_page;
+            if (per_page) {
+                url += '&per_page=' + per_page;
             }
             this.options.path = url;
-
+            let response = {  
+                count:0,
+                rows:[]
+            }
             let req = https.get(
                 this.options,
                 (res) => {
                     let data = '';
+                    let totalItems = +(res.headers['x-total-count']);
                     res.on('data', (chunk) => {
                         data += chunk;
                     });
                     res.on('end', () => {
                         try {
                             if (!data) {
-                                return resolve([]);
+                                return resolve(response);
                             }
-                            resolve(JSON.parse(data))
+                            response.count = totalItems,
+                            response.rows =JSON.parse(data)
+                                        
+                            resolve(response)
                         }
                         catch (e) {
                             reject(e);
@@ -176,7 +182,28 @@ class Woodpecker {
             let campaign_id = reqData.campaign.campaign_id;
             let prospects = reqData.prospects;
             prospects = _.chunk(prospects, 50);
-            async.mapSeries(prospects, this.createReqBody(campaign_id, this.options), function (err, responses) {
+            async.mapSeries(prospects, (prospects, callback) => {
+                let reqData = {
+                    campaign: {
+                        campaign_id: campaign_id
+                    },
+                    update: true,
+                    prospects: prospects
+                }
+                this.options.path = '/rest/v1/add_prospects_campaign';
+                this.options.method = "Post";
+                if(this.firstRequest){
+                    let response = this.createReqBody(reqData,callback);
+                    this.firstRequest = false; 
+                }
+                else{
+                    setTimeout(() => { 
+                        let response = this.createReqBody(reqData,callback);
+                         }, 5000);
+                }
+               
+
+            }, function (err, responses) {
                 if (err) {
                     reject(err)
                 }
@@ -187,84 +214,85 @@ class Woodpecker {
         });
 
     }
-    deleteProspect(prospectIds, campaign_id = false) {
-        prospectIds = prospectIds.trim();
+    deleteProspect(prospectIdArr, campaign_id = false) {
         return new Promise((resolve, reject) => {
-            var subUrl = prospectIds
-            if (campaign_id) {
-                subUrl += '&campaigns_id=' + campaign_id
+            
+            if (typeof prospectIdArr === 'string') {
+                prospectIdArr = prospectIdArr.split(',');
             }
-            this.options.path = '/rest/v1/prospects?id=' + subUrl
-            this.options.method = "Delete"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            if (!data) {
-                                return resolve([]);
-                            }
-                            resolve(JSON.parse(data))
-                        }
-                        catch (e) {
-                            reject(e);
-                        }
-                    })
+            prospectIdArr = _.chunk(prospectIdArr, 50);
+            async.mapSeries(prospectIdArr, (prospectIdArr, callback) => {
+                let prospectIds = prospectIdArr.join(',');
+                let subUrl = prospectIds.trim();
+                if (campaign_id) {
+                    subUrl += '&campaigns_id=' + campaign_id
                 }
-            );
-            req.on('error', e => {
-                reject(e);
-            })
-            req.end();
-        })
-    }
-    createReqBody(campaign_id, options) {
-        return function (prospects, callback) {
-            setTimeout(function () {
-                var reqData = {
-                    campaign: {
-                        campaign_id: campaign_id
-                    },
-                    update: true,
-                    prospects: prospects
-                }
-                options.path = '/rest/v1/add_prospects_campaign';
-                options.method = "Post"
-                var resReturned = "";
-                var request = https.request(options, function (response) {
-                    response.setEncoding('utf8');
-                    response.on("data", function (chunk) {
-                        resReturned += chunk;
-                    });
-                    response.on("end", function () {
-                        var responseToSend = null;
-                        if (!resReturned) {
-                            responseToSend = emptyObj;
-                        }
-                        else {
+                this.options.path = '/rest/v1/prospects?id=' + subUrl
+                this.options.method = "Delete"
+                let req = https.request(
+                    this.options,
+                    (res) => {
+                        let data = '';
+                        res.on('data', (chunk) => {
+                            data += chunk;
+                        });
+                        res.on('end', () => {
                             try {
-                                responseToSend = JSON.parse(resReturned);
+                                callback(null, data);
                             }
-                            catch (error) {
-                                console.log(error);
-                                return callback(null, emptyObj);
+                            catch (e) {
+                                callback(null, e);
                             }
-                        }
-                        callback(null, (!resReturned) ? emptyObj : responseToSend);
-                    });
-                }).on("error", function (error) {
-                    callback(error, null);
-                });
+                        })
+                    }
+                );
+                req.on('error', e => {
+                    callback(e, null);
+                })
+                req.end();
 
-                request.end(JSON.stringify(reqData));
-            }, 30000);
-        }
+            }, function (err, response) {
+                if (err) {
+                    reject(err)
+                }
+                else {
+                    resolve(response);
+                }
+            })
+        });
     }
+    createReqBody(reqData,callback) {
+       
+            var resReturned = "";
+            var emptyObj = {};
+            var request = https.request(this.options, function (response) {
+                response.setEncoding('utf8');
+                response.on("data", function (chunk) {
+                    resReturned += chunk;
+                });
+                response.on("end", function () {
+                    var responseToSend = null;
+                    if (!resReturned) {
+                        responseToSend = emptyObj;
+                    }
+                    else {
+                        try {
+                            responseToSend = JSON.parse(resReturned);
+                        }
+                        catch (error) {
+                            console.log(error);
+                            return callback(null, emptyObj);
+                        }
+                    }
+                    callback(null, (!resReturned) ? emptyObj : responseToSend);
+                });
+            }).on("error", function (error) {
+                callback(error, null);
+            });
 
+            request.end(JSON.stringify(reqData));
+       
+    }
 }
 module.exports = Woodpecker;
 
@@ -303,21 +331,6 @@ let x = new Woodpecker(config.woodpecker_api_key);
 
 
 // }
-// x.createCampaign(req).then(ls => {
-//     console.log(ls);
-// }).catch(err => {
-//     console.error(err);
-// })
-// x.getCampaignList().then(res =>{
-// console.log(res);
-// }).catch(err =>{
-//     console.error(err);
-// })
-// x.deleteProspect("25577616,25577617").then(ls => {
-//     console.log(ls);
-// }).catch(err => {
-//     console.error(err);
-// })
 
 // var prospectReq = {
 //     "campaign": {
@@ -337,4 +350,4 @@ let x = new Woodpecker(config.woodpecker_api_key);
 // }).catch(err => {
 //     console.error(err);
 // })
-// console.log(prospectReq)
+//console.log(prospectReq)
