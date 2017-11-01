@@ -6,7 +6,7 @@ const eventually = require('./test-helper').eventually;
 const TestConfig = require('./test-config');
 
 var woodpecker = null;
-
+var campaign_id = null;
 describe('Woodpecker API calls', function () {
 
     it('should be able to create woodpecker object', function () {
@@ -33,19 +33,10 @@ describe('Woodpecker API calls', function () {
         });
 
     })
-    it('should get list of prospects from specific campaigns', function (done) {
-        woodpecker.getProspectsFromSpecficCampaigns(71359).then(eventually(done, (ls => {
-            expect(ls).to.be.an.instanceOf(Array);
-            expect(ls.length).to.be.above(0);
-            initialLength = ls.length;
-        }))).catch(err => {
-            done(err);
-        });
-
-    })
+   
 
     var req = {
-        name: "First testing campaign 2",
+        name: "testing campaign",
         status: "DRAFT",
         from_name: "",
         from_email: "",
@@ -79,6 +70,7 @@ describe('Woodpecker API calls', function () {
         req.stats.emails[0].follow_up = 0;
         woodpecker.createCampaign(req).then(eventually(done, (ls => {
             expect(ls).to.be.an.instanceOf(Object);
+            campaign_id = ls.id;
 
         }))).catch(err => {
             done(err);
@@ -95,7 +87,16 @@ describe('Woodpecker API calls', function () {
         });
 
     })
+    it('should get specific campaign', function (done) {
+        woodpecker.getCampaignList(campaign_id).then(eventually(done, (ls => {
+            expect(ls).to.be.an.instanceOf(Array);
+            expect(ls.length).to.be.above(0);
+            initialLength = ls.length;
+        }))).catch(err => {
+            done(err);
+        });
 
+    })
     it('should create company', function (done) {
 
         let req = {
@@ -124,9 +125,18 @@ describe('Woodpecker API calls', function () {
         });
 
     })
+    it('should get list of prospects from specific campaign', function (done) {
+        woodpecker.getProspectsFromSpecficCampaigns(campaign_id).then(eventually(done, (ls => {
+            expect(ls).to.be.an.instanceOf(Object);
+            
+        }))).catch(err => {
+            done(err);
+        });
+
+    })
     var prospectReq = {
         "campaign":{
-            "campaign_id": 71961
+            "campaign_id": campaign_id
         },
         "update": "true",
         "prospects": [

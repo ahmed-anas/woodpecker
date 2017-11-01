@@ -22,9 +22,13 @@ class Woodpecker {
     }
 
 
-    getCampaignList() {
+    getCampaignList(campaign_id = undefined) {
         return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/campaign_list';
+            let url = '/rest/v1/campaign_list';
+            if(campaign_id){
+                url+="?id="+campaign_id;
+            }
+            this.options.path = url;
 
             let req = https.get(
                 this.options,
@@ -76,6 +80,9 @@ class Woodpecker {
             });
             req.end(JSON.stringify(reqData));
         })
+    }
+    updateCampaign(reqData) {
+       return createCampaign(reqData);
     }
     createCompany(reqData) {
         return new Promise((resolve, reject) => {
