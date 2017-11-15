@@ -29,7 +29,7 @@ class Woodpecker {
                 url+="?id="+campaign_id;
             }
             this.options.path = url;
-
+            console.log(this.options);
             let req = https.get(
                 this.options,
                 (res) => {
@@ -81,6 +81,7 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
+    
     updateCampaign(reqData) {
        return createCampaign(reqData);
     }
@@ -300,44 +301,108 @@ class Woodpecker {
             request.end(JSON.stringify(reqData));
        
     }
+    configureMailbox(reqData) {
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/mailbox/add';
+            this.options.method = "Post"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            req.end(JSON.stringify(reqData));
+        })
+    }
+    getMailbox(mailbox_id = undefined) {
+        return new Promise((resolve, reject) => {
+            let url = '/rest/v1/mailbox';
+            if(mailbox_id){
+                url+="?id="+mailbox_id;
+            }
+            this.options.path = url;
+
+            let req = https.get(
+                this.options,
+                (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve([]);
+                            }
+                            resolve(JSON.parse(data))
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                }
+            );
+            req.on('error', e => {
+                reject(e);
+            })
+            req.end();
+        })
+    }
 }
 module.exports = Woodpecker;
 
 let x = new Woodpecker(config.woodpecker_api_key);
-// var req = {
-//     name: "First testing campaign",
-//     status: "DRAFT",
-//     from_name: "Waqas Iqbal",
-//     from_email: "waqasiqbal740@gmail.com",
-//     per_day: 2,
-//     stats: {
-//         emails: [
-//             {
-//                 subject: "create campaign testing api",
-//                 msg: "campaign has been successfully addded ",
-//                 timezone: "Europe/Warsaw",
-//                 sunFrom: 0,
-//                 sunTo: 0,
-//                 monFrom: 0,
-//                 monTo: 0,
-//                 tueFrom: 0,
-//                 tueTo: 0,
-//                 wedFrom: 0,
-//                 wedTo: 0,
-//                 thuFrom: 0,
-//                 thuTo: 0,
-//                 friFrom: 0,
-//                 friTo: 0,
-//                 satFrom: 0,
-//                 satTo: 0,
-//                 follow_up:0
+var req = {
+    name: "First testing campaign 11",
+    status: "DRAFT",
+    from_name: "Waqas Iqbal",
+    from_email: "waqasiqbal740@gmail.com",
+    per_day: 2,
+    stats: {
+        emails: [
+            {
+                subject: "create campaign testing api",
+                msg: "campaign has been successfully addded ",
+                timezone: "Europe/Warsaw",
+                sunFrom: -1,
+                sunTo: -1,
+                monFrom: 0,
+                monTo: 0,
+                tueFrom: 0,
+                tueTo: 0,
+                wedFrom: 0,
+                wedTo: 0,
+                thuFrom: 0,
+                thuTo: 0,
+                friFrom: 0,
+                friTo: 0,
+                satFrom: 0,
+                satTo: 0,
+                follow_up:0
 
 
-//             }]
-//     }
+            }]
+    }
 
 
-// }
+}
+x.getCampaignList().then( res => {
+console.log(res)
+}).catch(err => {
+    console.log(err)
+})
 
 // var prospectReq = {
 //     "campaign": {
