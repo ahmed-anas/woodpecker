@@ -25,8 +25,8 @@ class Woodpecker {
     getCampaignList(campaign_id = undefined) {
         return new Promise((resolve, reject) => {
             let url = '/rest/v1/campaign_list';
-            if(campaign_id){
-                url+="?id="+campaign_id;
+            if (campaign_id) {
+                url += "?id=" + campaign_id;
             }
             this.options.path = url;
             console.log(this.options);
@@ -81,9 +81,9 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    
+
     updateCampaign(reqData) {
-       return createCampaign(reqData);
+        return createCampaign(reqData);
     }
     createCompany(reqData) {
         return new Promise((resolve, reject) => {
@@ -120,9 +120,9 @@ class Woodpecker {
                 url += '&per_page=' + per_page;
             }
             this.options.path = url;
-            let response = {  
-                count:0,
-                rows:[]
+            let response = {
+                count: 0,
+                rows: []
             }
             let req = https.get(
                 this.options,
@@ -138,8 +138,8 @@ class Woodpecker {
                                 return resolve(response);
                             }
                             response.count = totalItems,
-                            response.rows =JSON.parse(data)
-                                        
+                                response.rows = JSON.parse(data)
+
                             resolve(response)
                         }
                         catch (e) {
@@ -200,16 +200,16 @@ class Woodpecker {
                 }
                 this.options.path = '/rest/v1/add_prospects_campaign';
                 this.options.method = "Post";
-                if(this.firstRequest){
-                    let response = this.createReqBody(reqData,callback);
-                    this.firstRequest = false; 
+                if (this.firstRequest) {
+                    let response = this.createReqBody(reqData, callback);
+                    this.firstRequest = false;
                 }
-                else{
-                    setTimeout(() => { 
-                        let response = this.createReqBody(reqData,callback);
-                         }, 5000);
+                else {
+                    setTimeout(() => {
+                        let response = this.createReqBody(reqData, callback);
+                    }, 5000);
                 }
-               
+
 
             }, function (err, responses) {
                 if (err) {
@@ -224,7 +224,7 @@ class Woodpecker {
     }
     deleteProspect(prospectIdArr, campaign_id = false) {
         return new Promise((resolve, reject) => {
-            
+
             if (typeof prospectIdArr === 'string') {
                 prospectIdArr = prospectIdArr.split(',');
             }
@@ -269,37 +269,37 @@ class Woodpecker {
             })
         });
     }
-    createReqBody(reqData,callback) {
-       
-            var resReturned = "";
-            var emptyObj = {};
-            var request = https.request(this.options, function (response) {
-                response.setEncoding('utf8');
-                response.on("data", function (chunk) {
-                    resReturned += chunk;
-                });
-                response.on("end", function () {
-                    var responseToSend = null;
-                    if (!resReturned) {
-                        responseToSend = emptyObj;
-                    }
-                    else {
-                        try {
-                            responseToSend = JSON.parse(resReturned);
-                        }
-                        catch (error) {
-                            console.log(error);
-                            return callback(null, emptyObj);
-                        }
-                    }
-                    callback(null, (!resReturned) ? emptyObj : responseToSend);
-                });
-            }).on("error", function (error) {
-                callback(error, null);
-            });
+    createReqBody(reqData, callback) {
 
-            request.end(JSON.stringify(reqData));
-       
+        var resReturned = "";
+        var emptyObj = {};
+        var request = https.request(this.options, function (response) {
+            response.setEncoding('utf8');
+            response.on("data", function (chunk) {
+                resReturned += chunk;
+            });
+            response.on("end", function () {
+                var responseToSend = null;
+                if (!resReturned) {
+                    responseToSend = emptyObj;
+                }
+                else {
+                    try {
+                        responseToSend = JSON.parse(resReturned);
+                    }
+                    catch (error) {
+                        console.log(error);
+                        return callback(null, emptyObj);
+                    }
+                }
+                callback(null, (!resReturned) ? emptyObj : responseToSend);
+            });
+        }).on("error", function (error) {
+            callback(error, null);
+        });
+
+        request.end(JSON.stringify(reqData));
+
     }
     configureMailbox(reqData) {
         return new Promise((resolve, reject) => {
@@ -329,8 +329,8 @@ class Woodpecker {
     getMailbox(mailbox_id = undefined) {
         return new Promise((resolve, reject) => {
             let url = '/rest/v1/mailbox';
-            if(mailbox_id){
-                url+="?id="+mailbox_id;
+            if (mailbox_id) {
+                url += "?id=" + mailbox_id;
             }
             this.options.path = url;
 
@@ -359,6 +359,38 @@ class Woodpecker {
             })
             req.end();
         })
+    }
+    deleteSmtp(smtp_id) {
+        return new Promise((resolve, reject) => {
+         this.options.path = '/rest/v1/mailbox/delete?id='+ smtp_id
+            this.options.method = "Delete"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve([]);
+                            }
+                            resolve(JSON.parse(data))
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                }
+            );
+            req.on('error', e => {
+                reject(e);
+            })
+            req.end();
+
+        })
+
     }
 }
 module.exports = Woodpecker;
@@ -390,7 +422,7 @@ var req = {
                 friTo: 0,
                 satFrom: 0,
                 satTo: 0,
-                follow_up:0
+                follow_up: 0
 
 
             }]
@@ -398,8 +430,8 @@ var req = {
 
 
 }
-x.getCampaignList().then( res => {
-console.log(res)
+x.getCampaignList().then(res => {
+    console.log(res)
 }).catch(err => {
     console.log(err)
 })
