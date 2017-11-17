@@ -301,7 +301,7 @@ class Woodpecker {
         request.end(JSON.stringify(reqData));
 
     }
-    configureMailbox(reqData) {
+    configureMailBox(reqData) {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/mailbox/add';
             this.options.method = "Post"
@@ -326,7 +326,7 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    getMailbox(mailbox_id = undefined) {
+    getMailBox(mailbox_id = undefined) {
         return new Promise((resolve, reject) => {
             let url = '/rest/v1/mailbox';
             if (mailbox_id) {
@@ -345,7 +345,7 @@ class Woodpecker {
                         try {
                             if (!data) {
                                 return resolve([]);
-                            }
+                                }
                             resolve(JSON.parse(data))
                         }
                         catch (e) {
@@ -391,6 +391,56 @@ class Woodpecker {
 
         })
 
+    }
+    mailBoxSetting(reqData){
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/mailbox/settings';
+            this.options.method = "Post"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            req.end(JSON.stringify(reqData));
+        })
+    }
+    updateMailBox(reqData){
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/mailbox/update';
+            this.options.method = "Post"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            req.end(JSON.stringify(reqData));
+        })
     }
 }
 module.exports = Woodpecker;
