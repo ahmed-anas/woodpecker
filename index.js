@@ -154,6 +154,49 @@ class Woodpecker {
             req.end();
         })
     }
+    getProspects(queryParams = undefined) {
+        return new Promise((resolve, reject) => {
+            let url = '/rest/v1/prospects';
+            if(queryParams){
+                url +='?'+queryParams;
+                url = url.trim();
+            }
+           this.options.path = url;
+            let response = {
+                count: 0,
+                rows: []
+            }
+            let req = https.get(
+                this.options,
+                (res) => {
+                    let data = '';
+                    let totalItems = +(res.headers['x-total-count']);
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve(response);
+                            }
+                            
+                            response.count = totalItems,
+                                response.rows = JSON.parse(data)
+
+                            resolve(response)
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                }
+            );
+            req.on('error', e => {
+                reject(e);
+            })
+            req.end();
+        })
+    }
     getProspectList(ids) {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/prospects'
@@ -467,12 +510,14 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
+    
+
 }
 module.exports = Woodpecker;
 
 let x = new Woodpecker(config.woodpecker_api_key);
 var req = {
-    name: "First testing campaign 11",
+    name: "-1 issue",
     status: "DRAFT",
     from_name: "Waqas Iqbal",
     from_email: "waqasiqbal740@gmail.com",
@@ -505,11 +550,11 @@ var req = {
 
 
 }
-x.getCampaignList().then(res => {
-    console.log(res)
-}).catch(err => {
-    console.log(err)
-})
+// x.createCampaign(req).then(res => {
+//     console.log(res)
+// }).catch(err => {
+//     console.log(err)
+// })
 
 // var prospectReq = {
 //     "campaign": {
