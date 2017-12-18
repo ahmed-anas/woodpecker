@@ -369,9 +369,34 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    configureGoogle(reqData) {
+    configureGoogleOauthEndPoint(reqData) {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/mailbox/oauth';
+            this.options.method = "Post"
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            req.end(JSON.stringify(reqData));
+        })
+    }
+    configureGoogleAddEndPoint(reqData) {
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/mailbox/add';
             this.options.method = "Post"
             let req = https.request(
                 this.options,
