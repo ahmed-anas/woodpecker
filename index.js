@@ -19,6 +19,19 @@ class Woodpecker {
             }
         }
         this.firstRequest = true;
+        
+        this.webhookEvent = {
+            REPLIED: 'prospect_replied',
+            CLICKED: 'link_clicked',
+            OPENED: 'email_opened',
+            BOUNCED: 'prospect_bounced',
+            INVALID: 'prospect_invalid',
+            INTERESTED: 'prospect_interested',
+            'MAYBE-LATER': 'prospect_maybe_later',
+            'NOT-INTERESTED': 'prospect_not_interested',
+            AUTOREPLIED: 'prospect_autoreplied',
+            FOLLOWUP: 'followup_after_autoreply'
+      }
     }
 
 
