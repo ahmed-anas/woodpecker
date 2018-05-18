@@ -29,7 +29,6 @@ class Woodpecker {
                 url += "?id=" + campaign_id;
             }
             this.options.path = url;
-            console.log(this.options);
             let req = https.get(
                 this.options,
                 (res) => {
@@ -157,11 +156,11 @@ class Woodpecker {
     getProspects(queryParams = undefined) {
         return new Promise((resolve, reject) => {
             let url = '/rest/v1/prospects';
-            if(queryParams){
-                url +='?'+queryParams;
+            if (queryParams) {
+                url += '?' + queryParams;
                 url = url.trim();
             }
-           this.options.path = url;
+            this.options.path = url;
             let response = {
                 count: 0,
                 rows: []
@@ -179,7 +178,7 @@ class Woodpecker {
                             if (!data) {
                                 return resolve(response);
                             }
-                            
+
                             response.count = totalItems,
                                 response.rows = JSON.parse(data)
 
@@ -312,6 +311,8 @@ class Woodpecker {
             })
         });
     }
+    // secondary filter of prospects
+
     createReqBody(reqData, callback) {
 
         var resReturned = "";
@@ -438,7 +439,7 @@ class Woodpecker {
                         try {
                             if (!data) {
                                 return resolve([]);
-                                }
+                            }
                             resolve(JSON.parse(data))
                         }
                         catch (e) {
@@ -455,7 +456,7 @@ class Woodpecker {
     }
     deleteSmtp(smtp_id) {
         return new Promise((resolve, reject) => {
-         this.options.path = '/rest/v1/mailbox/delete?id='+ smtp_id
+            this.options.path = '/rest/v1/mailbox/delete?id=' + smtp_id
             this.options.method = "Delete"
             let req = https.request(
                 this.options,
@@ -485,7 +486,7 @@ class Woodpecker {
         })
 
     }
-    mailBoxSetting(reqData){
+    mailBoxSetting(reqData) {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/mailbox/settings';
             this.options.method = "Post"
@@ -510,7 +511,7 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    updateMailBox(reqData){
+    updateMailBox(reqData) {
         return new Promise((resolve, reject) => {
             this.options.path = '/rest/v1/mailbox/update';
             this.options.method = "Post"
@@ -535,8 +536,50 @@ class Woodpecker {
             req.end(JSON.stringify(reqData));
         })
     }
-    
 
+
+    req(url, reqData, method) {
+
+        return new Promise((resolve, reject) => {
+            this.options.path = '/rest/v1/' + url;
+            this.options.method = method || 'GET'
+            let req = https.request(
+                this.options,
+                (res) => {
+                    var statusCode = res.statusCode;
+                    res.on('data', (d) => {
+                        if (statusCode < 200 || statusCode >= 300) {
+                            reject(JSON.parse(d))
+
+                        }
+                        else {
+                            resolve(JSON.parse(d))
+                        }
+                    });
+                });
+
+            req.on('error', (e) => {
+                reject(e)
+            });
+            if (method == 'POST') {
+                req.end(JSON.stringify(reqData));
+            }
+            else {
+                req.end();
+            }
+        })
+
+    }
+    webhooks() {
+        return {
+            subscribe: (url, event) => {
+                return this.req('webhooks/subscribe', { target_url: url, event: event }, 'POST')
+            },
+            unsubscribe: (url, event) => {
+                return this.req('webhooks/unsubscribe', { target_url: url, event: event }, 'POST')
+            }
+        }
+    }
 }
 module.exports = Woodpecker;
 
