@@ -559,16 +559,23 @@ class Woodpecker {
             let req = https.request(
                 this.options,
                 (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
 
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
                     });
+                    res.on('end', () => {
+                        try {
+                            if (!data) {
+                                return resolve([]);
+                            }
+                            resolve(JSON.parse(data))
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    })
+                    
                 });
 
             req.on('error', (e) => {
