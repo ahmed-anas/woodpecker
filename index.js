@@ -292,7 +292,7 @@ class Woodpecker {
 
 
     req(url, reqData, method) {
-
+        method = method.toUpperCase();
         return new Promise((resolve, reject) => {
 
             let timeToWait = Math.max(0, 500 - (new Date()).getTime() - this.lastActionTime.getTime());
