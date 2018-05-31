@@ -19,7 +19,7 @@ class Woodpecker {
             }
         }
         this.firstRequest = true;
-
+        this.lastActionTime = new Date();
         this.webhookEvent = {
             REPLIED: 'prospect_replied',
             CLICKED: 'link_clicked',
