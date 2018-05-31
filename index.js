@@ -19,7 +19,7 @@ class Woodpecker {
             }
         }
         this.firstRequest = true;
-        
+
         this.webhookEvent = {
             REPLIED: 'prospect_replied',
             CLICKED: 'link_clicked',
@@ -31,98 +31,34 @@ class Woodpecker {
             'NOT-INTERESTED': 'prospect_not_interested',
             AUTOREPLIED: 'prospect_autoreplied',
             FOLLOWUP: 'followup_after_autoreply'
-      }
+        }
     }
 
 
     getCampaignList(campaign_id = undefined) {
-        return new Promise((resolve, reject) => {
-            let url = '/rest/v1/campaign_list';
-            if (campaign_id) {
-                url += "?id=" + campaign_id;
-            }
-            this.options.path = url;
-            let req = https.get(
-                this.options,
-                (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            if (!data) {
-                                return resolve([]);
-                            }
-                            resolve(JSON.parse(data))
-                        }
-                        catch (e) {
-                            reject(e);
-                        }
-                    })
-                }
-            );
-            req.on('error', e => {
-                reject(e);
-            })
-            req.end();
-        })
+        let url = 'campaign_list';
+        if (campaign_id) {
+            url += "?id=" + campaign_id;
+        }
+        return this.req(url, null, "Get")
+
+
     }
     createCampaign(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/campaign';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
+        let url = 'campaign';
+        return this.req(url, reqData, "Post")
 
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
     }
 
     updateCampaign(reqData) {
         return createCampaign(reqData);
     }
     createCompany(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/agency/companies/add';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
-
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
+        let url = 'agency/companies/add';
+        return this.req(url, reqData, "Post")
     }
     getProspectsFromSpecficCampaigns(ids, page = false, per_page = false) {
+
         return new Promise((resolve, reject) => {
             let url = '/rest/v1/prospects?campaigns_id=' + ids;
             if (page) {
@@ -167,6 +103,7 @@ class Woodpecker {
         })
     }
     getProspects(queryParams = undefined) {
+
         return new Promise((resolve, reject) => {
             let url = '/rest/v1/prospects';
             if (queryParams) {
@@ -210,34 +147,8 @@ class Woodpecker {
         })
     }
     getProspectList(ids) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/prospects'
-
-            let req = https.get(
-                this.options,
-                (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            if (!data) {
-                                return resolve([]);
-                            }
-                            resolve(JSON.parse(data))
-                        }
-                        catch (e) {
-                            reject(e);
-                        }
-                    })
-                }
-            );
-            req.on('error', e => {
-                reject(e);
-            })
-            req.end();
-        })
+        let url = 'prospects';
+        return this.req(url, null, "Get")
     }
     createProspectForCampaign(reqData) {
 
@@ -290,29 +201,14 @@ class Woodpecker {
                 if (campaign_id) {
                     subUrl += '&campaigns_id=' + campaign_id
                 }
-                this.options.path = '/rest/v1/prospects?id=' + subUrl
-                this.options.method = "Delete"
-                let req = https.request(
-                    this.options,
-                    (res) => {
-                        let data = '';
-                        res.on('data', (chunk) => {
-                            data += chunk;
-                        });
-                        res.on('end', () => {
-                            try {
-                                callback(null, data);
-                            }
-                            catch (e) {
-                                callback(null, e);
-                            }
-                        })
-                    }
-                );
-                req.on('error', e => {
-                    callback(e, null);
-                })
-                req.end();
+                let url = 'prospects?id=' + subUrl
+                this.req(url, null, "Delete")
+                    .then(x => {
+                        callback();
+                    }).catch(err => {
+                        callback();
+                    })
+
 
             }, function (err, response) {
                 if (err) {
@@ -359,234 +255,87 @@ class Woodpecker {
 
     }
     configureMailBox(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/mailbox/add';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
-
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
+        let url = "mailbox/add";
+        return this.req(url, reqData, "Post")
     }
     configureGoogleOauthEndPoint(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/mailbox/oauth';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
+        let url = "mailbox/oauth";
+        return this.req(url, reqData, "Post")
 
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
     }
     configureGoogleAddEndPoint(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/mailbox/add';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
+        let url = "mailbox/add";
+        return this.req(url, reqData, "Post")
 
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
     }
     getMailBox(mailbox_id = undefined) {
-        return new Promise((resolve, reject) => {
-            let url = '/rest/v1/mailbox';
-            if (mailbox_id) {
-                url += "?id=" + mailbox_id;
-            }
-            this.options.path = url;
+        let url = "mailbox";
+        if (mailbox_id) {
+            url += "?id=" + mailbox_id;
+        }
+        return this.req(url, null, "GET")
 
-            let req = https.get(
-                this.options,
-                (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            if (!data) {
-                                return resolve([]);
-                            }
-                            resolve(JSON.parse(data))
-                        }
-                        catch (e) {
-                            reject(e);
-                        }
-                    })
-                }
-            );
-            req.on('error', e => {
-                reject(e);
-            })
-            req.end();
-        })
     }
     deleteSmtp(smtp_id) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/mailbox/delete?id=' + smtp_id
-            this.options.method = "Delete"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            if (!data) {
-                                return resolve([]);
-                            }
-                            resolve(JSON.parse(data))
-                        }
-                        catch (e) {
-                            reject(e);
-                        }
-                    })
-                }
-            );
-            req.on('error', e => {
-                reject(e);
-            })
-            req.end();
+        return this.req("mailbox/delete?id=" + smtp_id, null, "Delete")
 
-        })
 
     }
     mailBoxSetting(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/mailbox/settings';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
+        return this.req("mailbox/settings", reqData, "Post")
 
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
     }
     updateMailBox(reqData) {
-        return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/mailbox/update';
-            this.options.method = "Post"
-            let req = https.request(
-                this.options,
-                (res) => {
-                    var statusCode = res.statusCode;
-                    res.on('data', (d) => {
-                        if (statusCode < 200 || statusCode >= 300) {
-                            reject(JSON.parse(d))
+        return this.req("mailbox/update", reqData, "Post")
 
-                        }
-                        else {
-                            resolve(JSON.parse(d))
-                        }
-                    });
-                });
-
-            req.on('error', (e) => {
-                reject(e)
-            });
-            req.end(JSON.stringify(reqData));
-        })
     }
 
 
     req(url, reqData, method) {
 
         return new Promise((resolve, reject) => {
-            this.options.path = '/rest/v1/' + url;
-            this.options.method = method || 'GET'
-            let req = https.request(
-                this.options,
-                (res) => {
 
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-                    res.on('end', () => {
-                        try {
-                            if (!data) {
-                                return resolve([]);
+            let timeToWait = Math.max(0, 500 - (new Date()).getTime() - this.lastActionTime.getTime());
+            this.lastActionTime = new Date();
+            setTimeout(() => {
+                this.lastActionTime = new Date()
+                this.options.path = '/rest/v1/' + url;
+                this.options.method = method || 'GET'
+                let req = https.request(
+                    this.options,
+                    (res) => {
+
+                        let data = '';
+                        res.on('data', (chunk) => {
+                            this.lastActionTime = new Date()
+                            data += chunk;
+                        });
+                        res.on('end', () => {
+                            this.lastActionTime = new Date()
+                            try {
+                                if (!data) {
+                                    return resolve([]);
+                                }
+                                resolve(JSON.parse(data))
                             }
-                            resolve(JSON.parse(data))
-                        }
-                        catch (e) {
-                            reject(e);
-                        }
-                    })
-                    
-                });
+                            catch (e) {
+                                reject(e);
+                            }
+                        })
 
-            req.on('error', (e) => {
-                reject(e)
-            });
-            if (method == 'POST') {
-                req.end(JSON.stringify(reqData));
-            }
-            else {
-                req.end();
-            }
+                    });
+
+                req.on('error', (e) => {
+                    this.lastActionTime = new Date()
+                    reject(e)
+                });
+                if (method == 'POST') {
+                    req.end(JSON.stringify(reqData));
+                }
+                else {
+                    req.end();
+                }
+            }, timeToWait)
         })
 
     }
