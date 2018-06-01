@@ -304,12 +304,18 @@ class Woodpecker {
                 let req = https.request(
                     this.options,
                     (res) => {
-
+                        var statusCode = res.statusCode;
                         let data = '';
                         res.on('data', (chunk) => {
-                            this.lastActionTime = new Date()
-                            data += chunk;
-                        });
+                            if (statusCode < 200 || statusCode >= 300) {
+                                return reject(JSON.parse(chunk))
+                            }
+                            else{
+                                this.lastActionTime = new Date()
+                                data += chunk;
+                            }
+                               
+                            });
                         res.on('end', () => {
                             this.lastActionTime = new Date()
                             try {
