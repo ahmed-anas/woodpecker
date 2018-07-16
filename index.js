@@ -6,7 +6,7 @@ var prospectsfile = require('./test/prospects');
 const async = require('async');
 const _ = require('lodash');
 //TODO: make it so it doesn't alter globalagent
-https.globalAgent.options.secureProtocol = 'TLSv1_method';
+//https.globalAgent.options.secureProtocol = 'TLSv1_method';
 class Woodpecker {
     constructor(API_KEY) {
         this.API_KEY = API_KEY;
