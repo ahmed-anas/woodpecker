@@ -151,37 +151,40 @@ class Woodpecker {
         return this.req(url, null, "Get")
     }
     createProspectForCampaign(reqData) {
-
         return new Promise((resolve, reject) => {
             let campaign_id = reqData.campaign.campaign_id;
+            let campaign = reqData.campaign.campaign;
             let prospects = reqData.prospects;
             prospects = _.chunk(prospects, 50);
-            async.mapSeries(prospects, (prospects, callback) => {
-                let reqData = {
-                    campaign: {
-                        campaign_id: campaign_id
-                    },
-                    update: true,
-                    prospects: prospects
-                }
-                this.options.path = '/rest/v1/add_prospects_campaign';
-                this.options.method = "Post";
-                if (this.firstRequest) {
-                    let response = this.createReqBody(reqData, callback);
-                    this.firstRequest = false;
-                }
-                else {
-                    setTimeout(() => {
-                        let response = this.createReqBody(reqData, callback);
-                    }, 5000);
-                }
+            async.eachOfSeries(prospects, (prospects, callback) => {
+                this.createCampaign(campaign)
+                    .then(v => {
+                        let reqData = {
+                            campaign: {
+                                campaign_id: campaign_id
+                            },
+                            update: true,
+                            prospects: prospects
+                        }
+                        this.options.path = '/rest/v1/add_prospects_campaign';
+                        this.options.method = "Post";
+                        if (this.firstRequest) {
+                            let response = this.createReqBody(reqData, callback);
+                            this.firstRequest = false;
+                        }
+                        else {
+                            setTimeout(() => {
+                                let response = this.createReqBody(reqData, callback);
+                            }, 5000);
+                        }
+                    });
 
-
-            }, function (err, responses) {
+            }, (err, responses) => {
                 if (err) {
                     reject(err)
                 }
                 else {
+                    this.createCampaign(campaign);
                     resolve(responses);
                 }
             })
@@ -314,8 +317,8 @@ class Woodpecker {
                                 this.lastActionTime = new Date()
                                 data += chunk;
                             }
-                               
-                            });
+
+                        });
                         res.on('end', () => {
                             this.lastActionTime = new Date()
                             try {
