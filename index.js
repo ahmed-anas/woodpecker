@@ -156,7 +156,7 @@ class Woodpecker {
             let campaign = reqData.campaign.campaign;
             let prospects = reqData.prospects;
             prospects = _.chunk(prospects, 50);
-            async.eachSeries(prospects, (prospects, callback) => {
+            async.mapSeries(prospects, (prospects, callback) => {
                 this.createCampaign(campaign)
                     .then(v => {
                         let reqData = {
