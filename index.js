@@ -150,7 +150,11 @@ class Woodpecker {
         let url = 'prospects';
         return this.req(url, null, "Get")
     }
-    createProspectForCampaign(reqData) {
+    async createProspectForCampaign(reqData) {
+        if (!reqData.campaign.campaign) {
+            let campaign = await this.getCampaignList(reqData.campaign.campaign_id);
+            reqData.campaign.campaign = campaign[0];
+        }
         return new Promise((resolve, reject) => {
             let campaign_id = reqData.campaign.campaign_id;
             let campaign = reqData.campaign.campaign;
@@ -313,7 +317,7 @@ class Woodpecker {
                             if (statusCode < 200 || statusCode >= 300) {
                                 return reject(JSON.parse(chunk))
                             }
-                            else{
+                            else {
                                 this.lastActionTime = new Date()
                                 data += chunk;
                             }
